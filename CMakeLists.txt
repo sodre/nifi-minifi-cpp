@@ -311,8 +311,13 @@ if (NOT WIN32)
 endif()
 
 # yaml-cpp
-include(BundledYamlCpp)
-use_bundled_yamlcpp(${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
+option(USE_SYSTEM_YAMLCPP "Instructs the build system to use system yaml-cpp" OFF)
+if(USE_SYSTEM_YAMLCPP)
+    find_package(yaml-cpp REQUIRED)
+else()
+	include(BundledYamlCpp)
+	use_bundled_yamlcpp(${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
+endif()
 
 # concurrentqueue
 add_library(concurrentqueue INTERFACE)
