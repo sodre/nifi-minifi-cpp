@@ -304,8 +304,13 @@ else()
 endif()
 
 # spdlog
-add_library(spdlog INTERFACE)
-target_include_directories(spdlog INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/spdlog-20170710/include")
+option(USE_SYSTEM_SPDLOG "Instructs the build system to use system SPDLOG" OFF)
+if(USE_SYSTEM_SPDLOG)
+	find_package(spdlog REQUIRED)
+else()
+	add_library(spdlog INTERFACE)
+	target_include_directories(spdlog INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/spdlog-20170710/include")
+endif()
 if (NOT WIN32)
 	set_property(TARGET spdlog APPEND PROPERTY INTERFACE_COMPILE_DEFINITIONS "SPDLOG_ENABLE_SYSLOG")
 endif()
@@ -341,12 +346,30 @@ add_library(cron INTERFACE)
 target_include_directories(cron INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/cron")
 
 # cxxopts
-add_library(cxxopts INTERFACE)
-target_include_directories(cxxopts INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/cxxopts/include")
+option(USE_SYSTEM_CXXOPTS "Instructs the build system to use system CXXOPTS" OFF)
+if (USE_SYSTEM_CXXOPTS)
+	find_package(cxxopts REQUIRED)
+	add_library(cxxopts INTERFACE IMPORTED)
+	set_target_properties(cxxopts PROPERTIES
+		INTERFACE_INCLUDE_DIRECTORIES "${cxxopts_INCLUDE_DIR}"
+	)
+else()
+	add_library(cxxopts INTERFACE)
+	target_include_directories(cxxopts INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/cxxopts/include")
+endif()
 
 # gsl-lite
-add_library(gsl-lite INTERFACE)
-target_include_directories(gsl-lite INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/gsl-lite-0.37.0/include")
+option(USE_SYSTEM_GSLLITE "Instructs the build system to use system gsl-lite" OFF)
+if (USE_SYSTEM_GSLLITE)
+	find_package(gsl-lite REQUIRED)
+	add_library(gsl-lite INTERFACE IMPORTED)
+	set_target_properties(gsl-lite PROPERTIES
+		INTERFACE_INCLUDE_DIRECTORIES "${gsllite_INCLUDE_DIR}"
+	)
+else()
+	add_library(gsl-lite INTERFACE)
+	target_include_directories(gsl-lite INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/gsl-lite-0.37.0/include")
+endif()
 
 # Add necessary definitions based on the value of STRICT_GSL_CHECKS, see gsl-lite README for more details
 list(APPEND GslDefinitions gsl_CONFIG_DEFAULTS_VERSION=1)
