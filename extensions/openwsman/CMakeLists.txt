@@ -26,7 +26,12 @@ add_library(minifi-openwsman STATIC ${SOURCES})
 set_property(TARGET minifi-openwsman PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 target_link_libraries(minifi-openwsman ${LIBMINIFI} Threads::Threads)
-target_link_libraries(minifi-openwsman OpenWSMAN::libwsman CIVETWEB::civetweb-cpp CIVETWEB::c-library LibXml2::LibXml2)
+target_link_libraries(minifi-openwsman OpenWSMAN::libwsman LibXml2::LibXml2)
+if(USE_SYSTEM_CIVET)
+    target_link_libraries(minifi-openwsman CIVETWEB::civetweb-cpp CIVETWEB::civetweb)
+else()
+    target_link_libraries(minifi-openwsman CIVETWEB::civetweb-cpp CIVETWEB::c-library)
+endif()
 
 SET (OPENWSMAN-EXTENSION minifi-openwsman PARENT_SCOPE)
 register_extension(minifi-openwsman)

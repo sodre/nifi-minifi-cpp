@@ -29,7 +29,11 @@ file(GLOB SOURCES  "processors/*.cpp")
 add_library(minifi-civet-extensions STATIC ${SOURCES})
 set_property(TARGET minifi-civet-extensions PROPERTY POSITION_INDEPENDENT_CODE ON)
 target_link_libraries(minifi-civet-extensions ${LIBMINIFI} Threads::Threads)
-target_link_libraries(minifi-civet-extensions CIVETWEB::c-library CIVETWEB::civetweb-cpp)
+if(USE_SYSTEM_CIVET)
+    target_link_libraries(minifi-civet-extensions civetweb::civetweb civetweb::civetweb-cpp)
+else()
+    target_link_libraries(minifi-civet-extensions CIVETWEB::c-library CIVETWEB::civetweb-cpp)
+endif()
 
 SET (civet-EXTENSIONS minifi-civet-extensions PARENT_SCOPE)
 
