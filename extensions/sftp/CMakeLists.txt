@@ -26,7 +26,12 @@ add_library(minifi-sftp STATIC ${SOURCES})
 set_property(TARGET minifi-sftp PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 target_link_libraries(minifi-sftp ${LIBMINIFI} Threads::Threads)
-target_link_libraries(minifi-sftp CURL::libcurl libssh2 RapidJSON)
+target_link_libraries(minifi-sftp CURL::libcurl RapidJSON)
+if(USE_SYSTEM_SSH2)
+    target_link_libraries(minifi-sftp Libssh2::libssh2)
+else()
+    target_link_libraries(minifi-sftp libssh2)
+endif()
 
 SET (SFTP minifi-sftp PARENT_SCOPE)
 register_extension(minifi-sftp)
