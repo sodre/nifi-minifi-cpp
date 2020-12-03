@@ -313,7 +313,7 @@ endif()
 # yaml-cpp
 option(USE_SYSTEM_YAMLCPP "Instructs the build system to use system yaml-cpp" OFF)
 if(USE_SYSTEM_YAMLCPP)
-    find_package(yaml-cpp REQUIRED)
+	find_package(yaml-cpp REQUIRED)
 else()
 	include(BundledYamlCpp)
 	use_bundled_yamlcpp(${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
@@ -324,8 +324,17 @@ add_library(concurrentqueue INTERFACE)
 target_include_directories(concurrentqueue INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/concurrentqueue")
 
 # RapidJSON
-add_library(RapidJSON INTERFACE)
-target_include_directories(RapidJSON INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/rapidjson-1.1.0/include")
+option(USE_SYSTEM_RAPIDJSON "Instructs the build system to use system RapidJSON" OFF)
+if (USE_SYSTEM_RAPIDJSON)
+	find_package(RapidJSON REQUIRED)
+	add_library(RapidJSON INTERFACE IMPORTED)
+	set_target_properties(RapidJSON PROPERTIES
+		INTERFACE_INCLUDE_DIRECTORIES "${RapidJSON_INCLUDE_DIR}"
+	)
+else()
+	add_library(RapidJSON INTERFACE)
+	target_include_directories(RapidJSON INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/rapidjson-1.1.0/include")
+endif()
 
 # Cron
 add_library(cron INTERFACE)
