@@ -1,0 +1,4 @@
+channel_sources:
+  - zeroae,conda-forge,defaults
+channel_targets:
+  - zeroae main

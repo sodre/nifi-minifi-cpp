@@ -1,0 +1,59 @@
+{% set name = "minifi" %}
+{% set version = "0.9.0" %}
+
+package:
+  name: {{ name }}
+  version: {{ version }}
+
+source:
+  folder: src
+  path: ../
+
+build:
+  number: 0
+  skip: true  # [win]
+  run_exports:
+    # Symbols are removed from a minor release to the next.
+    # https://abi-laboratory.pro/index.php?view=timeline&l=rocksdb
+    - {{ pin_subpackage(name, max_pin='x.x.x') }}
+
+requirements:
+  build:
+    - {{ compiler("c") }}
+    - {{ compiler("cxx") }}
+    - automake
+    - bison
+    - cmake >=3.5.1,<4
+    - flex
+    - ninja >=1.10,<2
+    - patch
+    - pkgconfig
+  host:
+    - bzip2
+    - civetweb
+    - flex
+    - libarchive >=3.3.2,<4
+    - libcurl
+    - libiconv
+    - libssh2
+    - libxml2
+    - nettle
+    - python
+    - yaml-cpp
+    - zlib
+
+test:
+  commands:
+    - minifi --help
+
+about:
+  home: https://nifi.apache.org/minifi
+  license: Apache-2.0
+  license_file: src/LICENSE
+  summary: MiNiFi C++ is a complementatry data collection approach of the core tenants of NiFi.
+
+  dev_url: https://github.com/apache/nifi-minifi-cpp
+
+extra:
+  recipe-maintainers:
+    - sodre
