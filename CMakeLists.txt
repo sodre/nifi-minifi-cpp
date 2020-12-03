@@ -177,6 +177,9 @@ if (ASAN_BUILD)
 	set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${ASAN_FLAGS}")
 endif()
 
+# Use PkgConfig if available
+find_package(PkgConfig)
+
 #### Third party dependencies ####
 
 # Define function for passing dependencies
@@ -239,35 +242,63 @@ if(NOT WIN32)
 endif()
 
 # OpenSSL/LibreSSL
+option(USE_SYSTEM_OPENSSL "Instructs the build system to use system OpenSSL" OFF)
 if (NOT OPENSSL_OFF)
-	include(BundledLibreSSL)
-	use_libre_ssl("${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_BINARY_DIR}")
-	list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/ssl")
+	if (USE_SYSTEM_OPENSSL)
+		find_package(OpenSSL REQUIRED)
+	else()
+		include(BundledLibreSSL)
+		use_libre_ssl("${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_BINARY_DIR}")
+		list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/ssl")
+	endif()
 
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DOPENSSL_SUPPORT")
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DOPENSSL_SUPPORT")
 endif()
 
 # libsodium
-include(BundledLibSodium)
-use_bundled_libsodium("${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_BINARY_DIR}")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DSODIUM_STATIC=1")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DSODIUM_STATIC=1")
+option(USE_SYSTEM_LIBSODIUM "Instructs the build system to use system libsodium" OFF)
+if(USE_SYSTEM_LIBSODIUM)
+	find_package(LIBSODIUM)
+	if(NOT LIBSODIUM_FOUND)
+        pkg_check_modules(LIBSODIUM REQUIRED IMPORTED_TARGET GLOBAL libsodium)
+        set(libsodium PkgConfig::LIBSODIUM)
+	endif()
+else()
+	include(BundledLibSodium)
+	use_bundled_libsodium("${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_BINARY_DIR}")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DSODIUM_STATIC=1")
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DSODIUM_STATIC=1")
+endif()
 
 # zlib
-include(BundledZLIB)
-use_bundled_zlib(${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/zlib/dummy")
+option(USE_SYSTEM_ZLIB "Instructs the build system to use system ZLIB" OFF)
+if(USE_SYSTEM_ZLIB)
+	find_package(ZLIB REQUIRED)
+else()
+	include(BundledZLIB)
+	use_bundled_zlib(${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
+	list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/zlib/dummy")
+endif()
 
 # uthash
 add_library(ut INTERFACE)
 target_include_directories(ut INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/ut")
 
 # cURL
+option(USE_SYSTEM_CURL "Instructs the build system to use system libcurl" OFF)
 if(NOT DISABLE_CURL)
-	include(BundledLibcURL)
-	use_bundled_curl(${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
-	list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/curl/dummy")
+	if(USE_SYSTEM_CURL)
+		find_package(CURL)
+		if(NOT CURL_FOUND)
+            pkg_check_modules(libcurl REQUIRED IMPORTED_TARGET GLOBAL libcurl)
+            set(CURL::libcurl PkgConfig::libcurl)
+		endif()
+	else()
+		include(BundledLibcURL)
+		use_bundled_curl(${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
+		list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/curl/dummy")
+	endif()
 else()
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DDISABLE_CURL")
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DDISABLE_CURL")
