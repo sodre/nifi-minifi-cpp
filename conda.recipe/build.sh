@@ -43,7 +43,7 @@ cmake \
 cmake --build build -- -j${CPU_COUNT}
 
 ## Test
-#cmake --build build -- test
+cmake --build build -- test
 
 ### Install Binaries
 cmake --build build -- package
