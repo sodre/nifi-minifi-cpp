@@ -13,8 +13,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from ctypes import cdll
+import sys
 import ctypes
+from ctypes import cdll
 from abc import abstractmethod
 
 
@@ -133,8 +134,9 @@ class FlowFile(object):
 
 class MiNiFi(object):
     """ Proxy Connector """
-    def __init__(self, dll_file, url, port, repo_type="filesystemrepository".encode("UTF-8")):
+    def __init__(self, url, port, repo_type="filesystemrepository".encode("UTF-8"), dll_file=None):
         super(MiNiFi, self).__init__()
+        dll_file = dll_file or f"{sys.base_prefix}/lib/minifi/libpython-lib.so"
         self._minifi= cdll.LoadLibrary(dll_file)
         """ create instance """
         self._minifi.create_instance_repo.argtypes = [ctypes.c_char_p , ctypes.POINTER(RPG_PORT), ctypes.c_char_p]
