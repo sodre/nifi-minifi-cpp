@@ -3,11 +3,11 @@
 
 package:
   name: {{ name }}
-  version: {{ version }}
+  version: {{ version }}dev{{ GIT_DESCRIBE_NUMBER }}
 
 source:
   folder: src
-  path: ../
+  git_url: ../
 
 build:
   number: 0
@@ -29,22 +29,34 @@ requirements:
     - patch
     - pkgconfig
   host:
-    - bzip2
     - civetweb
-    - flex
+    - cxxopts
+    #- flex
+    - gsl-lite
     - libarchive >=3.3.2,<4
+    # libcoap  missing on conda-forge
     - libcurl
-    - libiconv
+    - librdkafka
+    - libsodium
     - libssh2
     - libxml2
-    - nettle
+      #- nettle
+      #- open62541  minifi is outdated
     - python
+    - rapidjson
+    - rocksdb
     - yaml-cpp
     - zlib
+  run:
+    - cffi
 
 test:
+  imports:
+    - minifi
   commands:
-    - minifi --help
+    - minifi.sh start
+    - minifi.sh stop
+    - minificontroller --help
 
 about:
   home: https://nifi.apache.org/minifi
