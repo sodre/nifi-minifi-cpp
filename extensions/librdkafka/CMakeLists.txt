@@ -25,7 +25,12 @@ add_library(minifi-rdkafka-extensions STATIC ${SOURCES})
 set_property(TARGET minifi-rdkafka-extensions PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 target_link_libraries(minifi-rdkafka-extensions ${LIBMINIFI} Threads::Threads)
-target_link_libraries(minifi-rdkafka-extensions librdkafka)
+if (USE_SYSTEM_LIBRDKAFKA)
+    target_link_libraries(minifi-rdkafka-extensions PkgConfig::librdkafka)
+    target_include_directories(minifi-rdkafka-extensions PUBLIC "${librdkafka_INCLUDE_DIRS}/librdkafka")
+else()
+    target_link_libraries(minifi-rdkafka-extensions librdkafka)
+endif()
 
 SET (RDKAFKA-EXTENSIONS minifi-rdkafka-extensions PARENT_SCOPE)
 
