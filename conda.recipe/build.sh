@@ -10,12 +10,10 @@ cmake \
       -DCMAKE_PREFIX_PATH=$PREFIX \
       -DCMAKE_INSTALL_PREFIX=$PREFIX \
       -DCMAKE_INSTALL_LIBDIR=lib \
-      -DCMAKE_LIBRARY_OUTPUT_DIRECTORY=$PREFIX/lib \
+      -DCMAKE_LIBRARY_OUTPUT_DIRECTORY=$PREFIX/lib/minifi \
       -DCMAKE_BUILD_TYPE=Release \
       -DCMAKE_C_FLAGS="$CFLAGS $CPPFLAGS" \
       -DCMAKE_CXX_FLAGS="$CXXFLAGS $CPPFLAGS -lrt" \
-      -DENABLE_PYTHON=OFF \
-      -DPython3_EXECUTABLE=${PYTHON} \
       -DUSE_SYSTEM_CIVET=ON \
       -DUSE_SYSTEM_CURL=ON \
       -DUSE_SYSTEM_CXXOPTS=ON \
@@ -47,12 +45,12 @@ cmake --build build -- -j${CPU_COUNT}
 ## Test
 #cmake --build build -- test
 
-### Install
-#cmake --build build -- package
+### Install Binaries
+cmake --build build -- package
+tar -C $PREFIX -xvf build/nifi-minifi-cpp-*-bin.tar.gz --strip 1
+
+## Quick Hack so `import minifi` works
+cp -avf src/python/minifi $PREFIX/lib/python*/
 
 ### Checking requires a recompile with DEBUG enabled
 # cmake --build build -- check
-
-### Copy the tools to $PREFIX/bin
-# TODO: I someone needs the tools, please open a PR/issue.
-# cp build/tools/{ldb,rocksdb_{dump,undump},sst_dump} $PREFIX/bin

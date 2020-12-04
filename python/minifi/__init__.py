@@ -133,12 +133,12 @@ class FlowFile(object):
 
 class MiNiFi(object):
     """ Proxy Connector """
-    def __init__(self, dll_file, url, port):
+    def __init__(self, dll_file, url, port, repo_type="filesystemrepository".encode("UTF-8")):
         super(MiNiFi, self).__init__()
         self._minifi= cdll.LoadLibrary(dll_file)
         """ create instance """
-        self._minifi.create_instance.argtypes = [ctypes.c_char_p , ctypes.POINTER(RPG_PORT)]
-        self._minifi.create_instance.restype = ctypes.POINTER(NIFI_STRUCT)
+        self._minifi.create_instance_repo.argtypes = [ctypes.c_char_p , ctypes.POINTER(RPG_PORT), ctypes.c_char_p]
+        self._minifi.create_instance_repo.restype = ctypes.POINTER(NIFI_STRUCT)
         """ create new flow """
         self._minifi.create_new_flow.argtype = ctypes.POINTER(NIFI_STRUCT)
         self._minifi.create_new_flow.restype = ctypes.POINTER(CFlow)
@@ -185,15 +185,15 @@ class MiNiFi(object):
         self._minifi.init_api.restype = ctypes.c_int
         self._minifi.init_api(dll_file.encode("UTF-8"))
 
-        self._instance = self.__open_rpg(url,port)
+        self._instance = self.__open_rpg(url,port,repo_type)
         self._flow = self._minifi.create_new_flow( self._instance.get_instance() )
         self._minifi.enable_logging()
 
 
 
-    def __open_rpg(self, url, port):
+    def __open_rpg(self, url, port,repo_type):
         rpgPort = (RPG_PORT)(port)
-        rpg = self._minifi.create_instance(url, rpgPort)
+        rpg = self._minifi.create_instance_repo(url, rpgPort, repo_type)
         ret = RPG(rpg)
         return ret
 
